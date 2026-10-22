@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
-import { Button } from "@/components/ui/button";
+import { AuthNav } from "./auth-nav";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -18,8 +19,17 @@ interface NavbarProps {
   rightContent?: React.ReactNode;
 }
 
-export function Navbar({ navItems = [], rightContent }: NavbarProps) {
+export function Navbar({ navItems, rightContent }: NavbarProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const effectiveNavItems: NavItem[] =
+    navItems ??
+    (user
+      ? user.role === "MENTOR"
+        ? [{ label: "Mentor Dashboard", href: "/mentor/dashboard" }]
+        : [{ label: "My Submission", href: "/student/submission" }]
+      : []);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
@@ -35,9 +45,9 @@ export function Navbar({ navItems = [], rightContent }: NavbarProps) {
             <span className="text-sm font-semibold">ProjectReview Hub</span>
           </Link>
 
-          {navItems.length > 0 && (
+          {effectiveNavItems.length > 0 && (
             <nav className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => {
+              {effectiveNavItems.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link
@@ -59,22 +69,7 @@ export function Navbar({ navItems = [], rightContent }: NavbarProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          {rightContent ? (
-            rightContent
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link href="/login">
-                <Button variant="ghost" size="sm" className="text-xs">
-                  Log in
-                </Button>
-              </Link>
-              <Link href="/signup">
-                <Button size="sm" className="text-xs">
-                  Sign up
-                </Button>
-              </Link>
-            </div>
-          )}
+          {rightContent ?? <AuthNav />}
           <div className="h-4 w-px bg-border mx-1" aria-hidden="true" />
           <ThemeToggle />
         </div>

@@ -1,34 +1,76 @@
-const AUTH_TOKEN_KEY = process.env.AUTH_TOKEN_KEY as string
+/**
+ * Client-side cookie utilities for secure token and session handling.
+ */
 
-export const getAuthToken = (): string | null => {
-  if (typeof window === "undefined") {
-    return null
-  }
-  try {
-    return localStorage.getItem(AUTH_TOKEN_KEY)
-  } catch {
-    return null
-  }
+export interface CookieOptions {
+  days?: number
+  path?: string
+  sameSite?: "Lax" | "Strict" | "None"
+  secure?: boolean
 }
 
-export const setAuthToken = (token: string): void => {
-  if (typeof window === "undefined") {
-    return
+/**
+ * Sets a cookie in the browser.
+ */
+export function setCookie(
+  name: string,
+  value: string,
+  options: CookieOptions = {}
+): void {
+  if (typeof document === "undefined") return
+
+  const {
+    days = 7,
+    path = "/",
+    sameSite = "Lax",
+    secure = typeof window !== "undefined" &&
+      window.location.protocol === "https:",
+  } = options
+
+  let cookieString = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; path=${path}`
+
+  if (days) {
+    const maxAge = days * 24 * 60 * 60
+    cookieString += `; max-age=${maxAge}`
   }
-  try {
-    localStorage.setItem(AUTH_TOKEN_KEY, token)
-  } catch {
-    // Fail-safe if storage is restricted
+
+  cookieString += `; SameSite=${sameSite}`
+
+  if (secure) {
+    cookieString += "; Secure"
   }
+
+  document.cookie = cookieString
 }
 
-export const removeAuthToken = (): void => {
-  if (typeof window === "undefined") {
-    return
+/**
+ * Retrieves a cookie value by name from the browser.
+ */
+export function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null
+
+  const nameEQ = `${encodeURIComponent(name)}=`
+  const cookies = document.cookie.split(";")
+
+  for (let i = 0; i < cookies.length; i++) {
+    let c = cookies[i].trim()
+    if (c.indexOf(nameEQ) === 0) {
+      try {
+        return decodeURIComponent(c.substring(nameEQ.length))
+      } catch {
+        return c.substring(nameEQ.length)
+      }
+    }
   }
-  try {
-    localStorage.removeItem(AUTH_TOKEN_KEY)
-  } catch {
-    // Fail-safe
-  }
+
+  return null
+}
+
+/**
+ * Removes a cookie by expiring it immediately.
+ */
+export function removeCookie(name: string, path = "/"): void {
+  if (typeof document === "undefined") return
+
+  document.cookie = `${encodeURIComponent(name)}=; path=${path}; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT`
 }
