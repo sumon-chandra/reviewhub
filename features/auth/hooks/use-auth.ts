@@ -46,9 +46,6 @@ export function useAuth() {
         setCookie("accessToken", data.accessToken, { days: 7 })
       }
 
-      toast.success("Account created successfully!", {
-        description: `Welcome to Waypoint, ${data?.user?.name}.`,
-      })
       queryClient.setQueryData(AUTH_QUERY_KEY, data.user)
       queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEY })
       toast.success(`Welcome back, ${data.user.name}!`)
@@ -88,7 +85,12 @@ export function useAuth() {
     },
   })
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await authApi.logout()
+    } catch {
+      // Backend logout error non-blocking
+    }
     removeCookie("accessToken")
     queryClient.setQueryData(AUTH_QUERY_KEY, null)
     queryClient.clear()

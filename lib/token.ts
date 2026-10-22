@@ -53,7 +53,7 @@ export function getCookie(name: string): string | null {
   const cookies = document.cookie.split(";")
 
   for (let i = 0; i < cookies.length; i++) {
-    let c = cookies[i].trim()
+    const c = cookies[i].trim()
     if (c.indexOf(nameEQ) === 0) {
       try {
         return decodeURIComponent(c.substring(nameEQ.length))

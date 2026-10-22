@@ -11,4 +11,7 @@ export const authApi = {
 
   getMe: (): Promise<UserProfile> =>
     apiClient.get<UserProfile>("/auth/me", { requireAuth: true }),
+
+  logout: (): Promise<unknown> =>
+    apiClient.post("/auth/logout", undefined, { requireAuth: false }),
 };
