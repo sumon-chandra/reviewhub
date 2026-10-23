@@ -11,6 +11,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
+  X,
+  RotateCcw,
 } from "lucide-react";
 import type {
   MentorSubmissionItem,
@@ -72,6 +74,11 @@ export function SubmissionsTable({
 }: SubmissionsTableProps) {
   const [searchInput, setSearchInput] = React.useState(filters.search ?? "");
 
+  // Keep search input synced when URL search query parameter changes
+  React.useEffect(() => {
+    setSearchInput(filters.search ?? "");
+  }, [filters.search]);
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onFilterChange({
@@ -81,11 +88,32 @@ export function SubmissionsTable({
     });
   };
 
+  const handleClearSearch = () => {
+    setSearchInput("");
+    onFilterChange({
+      ...filters,
+      search: undefined,
+      page: 1,
+    });
+  };
+
   const handleStatusChange = (status: string | null) => {
     onFilterChange({
       ...filters,
       status: !status || status === "ALL" ? undefined : (status as SubmissionStatus),
       page: 1, // Reset to page 1 on filter change
+    });
+  };
+
+  const hasActiveFilters = Boolean(filters.search || filters.status);
+
+  const handleResetAll = () => {
+    setSearchInput("");
+    onFilterChange({
+      ...filters,
+      search: undefined,
+      status: undefined,
+      page: 1,
     });
   };
 
@@ -103,8 +131,18 @@ export function SubmissionsTable({
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search by student, email, or project title..."
-            className="pl-9 pr-20 text-xs h-9"
+            className="pl-9 pr-24 text-xs h-9"
           />
+          {searchInput && (
+            <button
+              type="button"
+              onClick={handleClearSearch}
+              className="absolute right-16 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+              title="Clear search"
+            >
+              <X className="size-3.5" />
+            </button>
+          )}
           <Button
             type="submit"
             variant="ghost"
@@ -139,6 +177,19 @@ export function SubmissionsTable({
               </SelectItem>
             </SelectContent>
           </Select>
+
+          {hasActiveFilters && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleResetAll}
+              className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground gap-1.5"
+              title="Reset search and filters"
+            >
+              <RotateCcw className="size-3.5" />
+              Reset
+            </Button>
+          )}
         </div>
       </div>
 

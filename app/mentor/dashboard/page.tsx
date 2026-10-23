@@ -6,21 +6,18 @@ import {
   useMentorStats,
   useMentorSubmissions,
 } from "@/features/mentor/hooks/use-mentor";
+import { useMentorSearchParams } from "@/features/mentor/hooks/use-mentor-search-params";
 import { StatsCards } from "@/features/mentor/components/stats-cards";
 import { SubmissionsTable } from "@/features/mentor/components/submissions-table";
 import { SubmissionDetailModal } from "@/features/mentor/components/submission-detail-modal";
 import { ReviewModal } from "@/features/mentor/components/review-modal";
 import { ErrorCard } from "@/components/feedback/error-card";
+import { LoadingSpinner } from "@/components/feedback/loading-spinner";
 import { Button } from "@/components/ui/button";
-import type { MentorSubmissionItem, QuerySubmissionsParams } from "@/types";
+import type { MentorSubmissionItem } from "@/types";
 
-export default function MentorDashboardPage() {
-  const [filters, setFilters] = React.useState<QuerySubmissionsParams>({
-    page: 1,
-    limit: 10,
-    sortBy: "submittedAt",
-    order: "desc",
-  });
+function MentorDashboardContent() {
+  const { filters, updateFilters } = useMentorSearchParams();
 
   const [inspectSubmission, setInspectSubmission] =
     React.useState<MentorSubmissionItem | null>(null);
@@ -127,7 +124,7 @@ export default function MentorDashboardPage() {
             meta={submissionsEnvelope?.meta}
             filters={filters}
             isLoading={isSubmissionsLoading}
-            onFilterChange={setFilters}
+            onFilterChange={updateFilters}
             onInspect={(sub) => setInspectSubmission(sub)}
             onReview={(sub) => setReviewSubmission(sub)}
           />
@@ -162,3 +159,18 @@ export default function MentorDashboardPage() {
     </div>
   );
 }
+
+export default function MentorDashboardPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <LoadingSpinner label="Loading mentor workspace..." />
+        </div>
+      }
+    >
+      <MentorDashboardContent />
+    </React.Suspense>
+  );
+}
+

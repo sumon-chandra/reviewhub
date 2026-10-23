@@ -1,26 +1,27 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import Link from "next/link";
-import { LogOut, User as UserIcon } from "lucide-react";
-import { useAuth } from "@/features/auth/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import * as React from "react"
+import Link from "next/link"
+import { LogOut, User as UserIcon } from "lucide-react"
+import { useAuth } from "@/features/auth/hooks/use-auth"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/components/ui/dropdown-menu"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function AuthNav() {
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth()
 
   if (isLoading) {
-    return <Skeleton className="h-8 w-24 rounded-md" />;
+    return <Skeleton className="h-8 w-24 rounded-md" />
   }
 
   if (!isAuthenticated || !user) {
@@ -37,74 +38,71 @@ export function AuthNav() {
           </Button>
         </Link>
       </div>
-    );
+    )
   }
 
-  const isMentor = user.role === "MENTOR";
-  const dashboardHref = isMentor ? "/mentor/dashboard" : "/student/submission";
+  const isMentor = user.role === "MENTOR"
+  const dashboardHref = isMentor ? "/mentor/dashboard" : "/student/submission"
 
   return (
     <div className="flex items-center gap-3">
-      <Link href={dashboardHref} className="hidden sm:inline-block">
-        <Badge
-          variant={isMentor ? "default" : "secondary"}
-          className="text-[10px] tracking-wide uppercase px-2 py-0.5"
-        >
-          {user.role}
-        </Badge>
-      </Link>
-
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
             <Button
               variant="outline"
               size="sm"
-              className="gap-2 text-xs h-8 px-2.5 font-normal border-border/80"
+              className="h-8 gap-2 border-border/80 px-2.5 text-xs font-normal"
             />
           }
         >
           <div className="flex size-5 items-center justify-center rounded-full bg-primary/10 text-primary">
             <UserIcon className="size-3" />
           </div>
-          <span className="max-w-[110px] truncate text-foreground font-medium">
+          <span className="max-w-[110px] truncate font-medium text-foreground">
             {user.name}
           </span>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1">
-              <p className="text-xs font-semibold leading-none text-foreground">{user.name}</p>
-              <p className="text-[11px] leading-none text-muted-foreground truncate">
-                {user.email}
-              </p>
-              <div className="pt-1">
-                <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-mono">
-                  {user.role}
-                </Badge>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-xs leading-none font-semibold text-foreground">
+                  {user.name}
+                </p>
+                <p className="truncate text-[11px] leading-none text-muted-foreground">
+                  {user.email}
+                </p>
+                <div className="pt-1">
+                  <Badge
+                    variant="outline"
+                    className="px-1.5 py-0 font-mono text-[10px]"
+                  >
+                    {user.role}
+                  </Badge>
+                </div>
               </div>
-            </div>
-          </DropdownMenuLabel>
+            </DropdownMenuLabel>
+            <DropdownMenuItem render={<Link href={dashboardHref} />}>
+              {isMentor ? "Mentor Dashboard" : "My Submission"}
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
 
           <DropdownMenuSeparator />
 
-          <DropdownMenuItem render={<Link href={dashboardHref} />}>
-            {isMentor ? "Mentor Dashboard" : "My Submission"}
-          </DropdownMenuItem>
-
-          <DropdownMenuSeparator />
-
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={logout}
-            className="cursor-pointer gap-2"
-          >
-            <LogOut className="size-3.5" />
-            Log out
-          </DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={logout}
+              className="cursor-pointer gap-2"
+            >
+              <LogOut className="size-3.5" />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
-  );
+  )
 }
