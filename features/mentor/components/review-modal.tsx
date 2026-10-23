@@ -4,7 +4,7 @@ import * as React from "react";
 import { useForm } from "@tanstack/react-form";
 import { Award, CheckCircle2, Loader2, Sparkles, XCircle } from "lucide-react";
 import type { MentorSubmissionItem, MentorSubmissionDetail } from "@/types";
-import type { ReviewFormInput } from "../schemas/review-schema";
+import { reviewSchema, type ReviewFormInput } from "../schemas/review-schema";
 import { useReviewSubmissionMutation } from "../hooks/use-mentor";
 import { RATING_LABELS } from "@/features/student/utils/format-review";
 import { Button } from "@/components/ui/button";
@@ -151,23 +151,15 @@ export function ReviewModal({
             name="feedback"
             validators={{
               onChange: ({ value }) => {
-                const isRejected = form.getFieldValue("decision") === "REJECTED";
-                if (isRejected && (!value || value.trim().length < 5)) {
-                  return "Constructive feedback (at least 5 characters) is required when requesting revisions.";
-                }
-                return undefined;
+                const res = reviewSchema.shape.feedback.safeParse(value);
+                return res.success ? undefined : res.error.issues[0]?.message;
               },
             }}
           >
             {(field) => (
               <div className="space-y-1.5 text-left">
                 <label htmlFor={field.name} className="text-xs font-medium text-foreground">
-                  Mentor Remarks & Feedback{" "}
-                  {form.getFieldValue("decision") === "REJECTED" ? (
-                    <span className="text-destructive font-semibold">(Required)</span>
-                  ) : (
-                    <span className="text-muted-foreground font-normal">(Optional)</span>
-                  )}
+                  Mentor Remarks & Feedback <span className="text-destructive font-semibold">*</span>
                 </label>
                 <Textarea
                   id={field.name}
@@ -175,8 +167,8 @@ export function ReviewModal({
                   rows={4}
                   placeholder={
                     form.getFieldValue("decision") === "REJECTED"
-                      ? "Explain specifically what issues must be resolved before resubmission..."
-                      : "Provide commendations, suggestions for production readiness, or general feedback..."
+                      ? "Explain specifically what issues must be resolved before resubmission (min. 5 characters)..."
+                      : "Provide commendations, suggestions for production readiness, or general feedback (min. 5 characters)..."
                   }
                   value={field.state.value ?? ""}
                   onBlur={field.handleBlur}

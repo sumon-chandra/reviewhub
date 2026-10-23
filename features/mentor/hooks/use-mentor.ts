@@ -61,10 +61,20 @@ export function useReviewSubmissionMutation() {
       toast.success("Submission evaluation recorded successfully!");
     },
     onError: (err) => {
-      const message =
-        err instanceof ApiClientError
-          ? err.message
-          : "Failed to submit review. Please try again.";
+      let message = "Failed to submit review. Please try again.";
+      if (err instanceof ApiClientError) {
+        if (
+          Array.isArray(err.errors) &&
+          err.errors.length > 0 &&
+          typeof err.errors[0] === "object" &&
+          err.errors[0] !== null &&
+          "message" in err.errors[0]
+        ) {
+          message = String((err.errors[0] as { message: unknown }).message);
+        } else {
+          message = err.message;
+        }
+      }
       toast.error(message);
     },
   });
