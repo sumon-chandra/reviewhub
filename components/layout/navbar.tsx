@@ -41,7 +41,7 @@ export function Navbar({ navItems }: NavbarProps) {
             <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
               <CheckCircle2 className="size-4" />
             </div>
-            <span className="text-sm font-semibold">Project Review Hub</span>
+            <span className="text-sm font-semibold">Review Hub</span>
           </Link>
 
           {effectiveNavItems.length > 0 && (
